@@ -316,12 +316,12 @@ class CarController():
         lkas_active = c.active
       # disable when temp fault is active, or below LKA minimum speed
       elif self.opkr_maxanglelimit == 90:
-        lkas_active = c.active and abs(CS.out.steeringAngleDeg) < self.opkr_maxanglelimit
+        lkas_active = c.active and abs(CS.out.steeringAngleDeg) < self.opkr_maxanglelimit and CS.out.gearShifter == GearShifter.drive
       elif self.opkr_maxanglelimit > 90:
         str_angle_limit = interp(CS.out.vEgo * CV.MS_TO_KPH, [0, 20], [self.opkr_maxanglelimit+60, self.opkr_maxanglelimit])
-        lkas_active = c.active and abs(CS.out.steeringAngleDeg) < str_angle_limit
+        lkas_active = c.active and abs(CS.out.steeringAngleDeg) < str_angle_limit and CS.out.gearShifter == GearShifter.drive
       else:
-        lkas_active = c.active
+        lkas_active = c.active and CS.out.gearShifter == GearShifter.drive
       if CS.mdps_error_cnt > self.to_avoid_lkas_fault_max_frame:
         self.cut_steer = True
       elif self.cut_steer_frames > 1:
@@ -385,7 +385,7 @@ class CarController():
 
     clu11_speed = CS.clu11["CF_Clu_Vanz"]
     enabled_speed = 38 if CS.is_set_speed_in_mph else 60
-    if clu11_speed > enabled_speed or not lkas_active:
+    if clu11_speed > enabled_speed or not lkas_active or CS.out.gearShifter != GearShifter.drive:
       enabled_speed = clu11_speed
 
     if CS.cruise_active: # to toggle lkas, hold gap button for 1 sec
@@ -898,8 +898,8 @@ class CarController():
           can_sends.append(create_scc12(self.packer, accel, enabled, self.scc_live, CS.out.gasPressed, CS.out.brakePressed, 
            CS.out.stockAeb, self.car_fingerprint, CS.out.vEgo * CV.MS_TO_KPH, self.stopped, self.acc_standstill, radar_recog, self.scc12_cnt, CS.scc12))
         self.scc12_cnt += 1
-        # can_sends.append(create_scc14(self.packer, enabled, CS.scc14, CS.out.stockAeb, lead_visible, self.dRel, 
-        #  CS.out.vEgo, self.acc_standstill, self.car_fingerprint))
+        can_sends.append(create_scc14(self.packer, enabled, CS.scc14, CS.out.stockAeb, lead_visible, self.dRel, 
+         CS.out.vEgo, self.acc_standstill, self.car_fingerprint))
         self.accel = accel
       if frame % 20 == 0:
         if self.radar_disabled_conf:
