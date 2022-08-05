@@ -30,9 +30,11 @@ int main() {
   long  tv_nsec;
   float tv_nsec2;
   bool  sBump = false;
+  float car_speed_ms = 0;
 
   ExitHandler do_exit;
   PubMaster pm({"liveNaviData"});
+  SubMaster sm({"carState"});
   LiveNaviDataResult res;
 
   log_time last_log_time = {};
@@ -57,6 +59,9 @@ int main() {
    // assert(kernel_logger);
 
     while (!do_exit) {
+      sm.update(0);
+      car_speed_ms = sm["carState"].getCarState().getVEgo();
+
       log_msg log_msg;
       int err = android_logger_list_read(logger_list, &log_msg);
       if (err <= 0) break;
@@ -112,7 +117,7 @@ int main() {
       {
         res.distanceToTurn = atoi( entry.message );
       }
-      else if( nDelta_nsec > 5000 )
+      else if( nDelta_nsec > 5000 && car_speed_ms > 1.0 )
       {
         if (res.safetySign == 197 && res.speedLimitDistance < 100) {
           res.speedLimitDistance = 0;

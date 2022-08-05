@@ -48,6 +48,7 @@ class CarInterfaceBase(ABC):
       self.CC = CarController(self.cp.dbc_name, CP, self.VM)
 
     self.steer_warning_fix_enabled = Params().get_bool("SteerWarningFix")
+    self.user_specific_feature = int(Params().get("UserSpecificFeature", encoding="utf8"))
 
   @staticmethod
   def get_pid_accel_limits(CP, current_speed, cruise_speed):
@@ -124,13 +125,17 @@ class CarInterfaceBase(ABC):
       events.add(EventName.doorOpen)
     if cs_out.seatbeltUnlatched:
       events.add(EventName.seatbeltNotLatched)
-    if cs_out.gearShifter != GearShifter.drive and (extra_gears is None or
-       cs_out.gearShifter not in extra_gears) and cs_out.cruiseState.enabled:
-      events.add(EventName.wrongGear)
-    if cs_out.gearShifter == GearShifter.reverse:
-      events.add(EventName.reverseGear)
-    if not cs_out.cruiseState.available and cs_out.cruiseState.enabled:
-      events.add(EventName.wrongCarMode)
+    if self.user_specific_feature == 11:
+      if cs_out.gearShifter == GearShifter.reverse:
+        events.add(EventName.reverseGear)
+    else:
+      if cs_out.gearShifter != GearShifter.drive and (extra_gears is None or
+        cs_out.gearShifter not in extra_gears) and cs_out.cruiseState.enabled:
+        events.add(EventName.wrongGear)
+      if cs_out.gearShifter == GearShifter.reverse:
+        events.add(EventName.reverseGear)
+      if not cs_out.cruiseState.available and cs_out.cruiseState.enabled:
+        events.add(EventName.wrongCarMode)
     if cs_out.espDisabled:
       events.add(EventName.espDisabled)
     #if cs_out.gasPressed:
