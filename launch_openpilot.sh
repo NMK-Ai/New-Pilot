@@ -15,11 +15,11 @@ if [ "$ALIAS_CHECK" == "" ]; then
     mount -o remount,r /system
 fi
 
-# if [ "$GET_PROP1" != "ko-KR" ]; then
-#     setprop persist.sys.locale ko-KR
+# if [ "$GET_PROP1" != "ar-SA" ]; then
+#     setprop persist.sys.locale ar-SA
 # fi
-# if [ "$GET_PROP2" != "ko-KR" ]; then
-#     setprop persist.sys.local ko-KR
+# if [ "$GET_PROP2" != "ar-SA" ]; then
+#     setprop persist.sys.local ar-SA
 # fi
 if [ "$GET_PROP_STZ" != "" ] && [ "$GET_PROP_ATZ" != "$GET_PROP_STZ" ]; then
     setprop persist.sys.timezone $GET_PROP_STZ
